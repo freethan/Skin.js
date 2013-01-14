@@ -880,10 +880,12 @@ was set.
 			opt = {icon: icon},
 			x = anchor.x,
 			y = anchor.y;
+		
 		this.marker = nokia.maps.dom.EventTarget(new nokia.maps.map.Marker(coord, opt));
 		this.map; //to which marker belongs to
 		this.origin = new google.maps.Point(0, 0); //default value
 		this.clickable; //if marker catch mouse/touch events. Default = true;
+		this._iconImage;//store for Image object which has always with and height
 
 		//set DOM Event listeners
 		this._domEventsListener = this._domEventsListener.bind(this);
@@ -924,16 +926,24 @@ was set.
 							value.origin ? value.origin.height : UNDEF);
 						value.origin && (obj.origin = value.origin);
 						//todo: scaling is not supported in 2.2.3 version
-						//todo: implement value.anchor, by default is bottom, middle
+						obj._iconImage = icon;
 					} else if (value.path) { //google.maps.Symbol
 						//todo: support  Symbol
 					} else {
-						icon = value;
+						icon = new nokia.maps.gfx.BitmapImage(
+							value,
+							document
+						);
+						obj._iconImage = icon;
 					}
-					obj.marker.set("icon", icon);
+					obj._iconImage.prepare(function(){
+						obj.marker.set("anchor", new nokia.maps.util.Point(this._iconImage.width/2, this._iconImage.height));
+						obj.marker.set("icon", obj._iconImage);
+					}, obj);
+					
 					break;
 				case "anchorPoint":
-					obj.marker.set("anchor", new nokia.maps.util.Point(value.x, value.y));
+					//obj.marker.set("anchor", new nokia.maps.util.Point(value.x, value.y));
 					break;
 				case "shape":
 					obj.marker.set("hitArea", obj._prepareHitArea(value));
@@ -1562,7 +1572,7 @@ google.maps.Map.prototype.setMapTypeId = function(mapTypeId) {
 google.maps.Map.prototype.setOptions = function(options) {};
 
 /**
- * TODO to be investigated
+ * TODO: when Nokia API with Panorama comes that this can be implemented
  * @param {google.maps.StreetViewPanorama} panorama
  */
 google.maps.Map.prototype.setStreetView = function(panorama) {};
