@@ -58,13 +58,15 @@
     }
 
     authenticateAndSkin = function () {
-        (new Function(authCodeSrc))(); // invoke auth with Nokia
+        if (authCodeSrc) {
+            (new Function(authCodeSrc))(); // invoke auth with Nokia
+        }
         // appendSkinScript
          doc.head.appendChild(skinPayLoadTag);
     }
 
     // Prepare callback when everything else is done
-    finalCallBack = new Function(callBackSrc);
+    finalCallBack = callBackSrc ? new Function(callBackSrc) : function(){};
 
     // Prepare skin lib script
     skinPayLoadTag.setAttribute("type", "text/javascript");
@@ -81,5 +83,6 @@
         skinPayLoadTag.onload = finalCallBack;
     }
 
+    // Start the whole thing
     authenticateAndSkin();
 })(window, document);
